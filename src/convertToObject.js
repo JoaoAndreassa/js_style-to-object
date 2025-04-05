@@ -2,11 +2,8 @@
 
 /**
  * @param {string} sourceString
- *
  * @return {object}
  */
-'use strict';
-
 function convertToObject(sourceString) {
   const styleEntries = sourceString
     .split(';')
@@ -34,29 +31,28 @@ function convertToObject(sourceString) {
   return styleObject;
 }
 
-// Separação da lógica de limpeza de valor para melhorar a leitura
 function cleanStyleValue(valueString) {
-  const chars = valueString.split('');
-  const hasComma = chars.includes(',');
+  const characters = valueString.split('');
+  const hasComma = characters.includes(',');
 
   if (hasComma) {
-    const firstNonSpaceIndex = chars.findIndex(
+    const firstNonSpaceIndex = characters.findIndex(
       (char) => char !== ' ' && char !== '\n' && char !== '\t',
     );
 
-    return chars.slice(firstNonSpaceIndex).join('');
+    return characters.slice(firstNonSpaceIndex).join('');
   }
 
-  const cleaned = chars
+  const cleaned = characters
     .join('')
     .replaceAll('\n', '')
     .replaceAll('"', '')
     .replaceAll('\t', '');
 
-  const firstIndex = [...cleaned].findIndex((char) => char !== ' ');
-  const lastIndex = [...cleaned].findLastIndex((char) => char !== ' ');
+  const first = [...cleaned].findIndex((char) => char !== ' ');
+  const last = [...cleaned].findLastIndex((char) => char !== ' ');
 
-  return cleaned.slice(firstIndex, lastIndex + 1);
+  return cleaned.slice(first, last + 1);
 }
 
 module.exports = convertToObject;

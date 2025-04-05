@@ -8,70 +8,55 @@
 'use strict';
 
 function convertToObject(sourceString) {
-  let arrayElements = sourceString.split(';');
+  const styleEntries = sourceString
+    .split(';')
+    .map((item) => item.trim())
+    .filter((item) => item.includes(':'));
 
-  arrayElements = arrayElements
+  const styleObject = styleEntries.reduce((acc, entry) => {
+    const colonIndex = entry.indexOf(':');
 
-    .filter((item) => item.includes(':'))
-    .reduce((prev, item) => {
-      const brakeIndex = item.indexOf(':');
+    const key = entry
+      .slice(0, colonIndex)
+      .replaceAll(' ', '')
+      .replaceAll('\n', '')
+      .replaceAll('\t', '');
 
-      const keyResult = item
-        .slice(0, brakeIndex)
-        .replaceAll(' ', '')
-        .replaceAll('\n', '')
-        .replaceAll('\t', '');
+    const rawValue = entry.slice(colonIndex + 1);
+    const value = cleanStyleValue(rawValue);
 
-      const valueResult = () => {
-        const result = item.slice(brakeIndex + 1, item.length);
+    return {
+      ...acc,
+      [key]: value,
+    };
+  }, {});
 
-        const symbols = result.split('');
+  return styleObject;
+}
 
-        let newResult = '';
+// Separação da lógica de limpeza de valor para melhorar a leitura
+function cleanStyleValue(valueString) {
+  const chars = valueString.split('');
+  const hasComma = chars.includes(',');
 
-        if (!symbols.includes(',')) {
-          const symbolsCleared = symbols
-            .join('')
-            .replaceAll('\n', '')
-            .replaceAll('"', '')
-            .replaceAll('\t', '')
-            .split('');
+  if (hasComma) {
+    const firstNonSpaceIndex = chars.findIndex(
+      (char) => char !== ' ' && char !== '\n' && char !== '\t',
+    );
 
-          const firstNonSpaceIndex = symbolsCleared.findIndex(
-            (char) => char !== ' ',
-          );
-          const lastNonSpaceIndex = symbolsCleared.findLastIndex(
-            (char) => char !== ' ',
-          );
+    return chars.slice(firstNonSpaceIndex).join('');
+  }
 
-          newResult = symbolsCleared
-            .slice(firstNonSpaceIndex, lastNonSpaceIndex + 1)
-            .join('');
-        }
+  const cleaned = chars
+    .join('')
+    .replaceAll('\n', '')
+    .replaceAll('"', '')
+    .replaceAll('\t', '');
 
-        if (symbols.includes(',')) {
-          const filterCallback = (letter, index) => {
-            return (
-              index >=
-              symbols.findIndex(
-                (char) => char !== ' ' && char !== '\n' && char !== '\t',
-              )
-            );
-          };
+  const firstIndex = [...cleaned].findIndex((char) => char !== ' ');
+  const lastIndex = [...cleaned].findLastIndex((char) => char !== ' ');
 
-          newResult = symbols.filter(filterCallback).join('');
-        }
-
-        return newResult;
-      };
-
-      return {
-        ...prev,
-        [keyResult]: `${valueResult()}`,
-      };
-    }, {});
-
-  return arrayElements;
+  return cleaned.slice(firstIndex, lastIndex + 1);
 }
 
 module.exports = convertToObject;
